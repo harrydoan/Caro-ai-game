@@ -619,32 +619,44 @@
         }
 
         function checkWin(row, col, player) {
-            const directions = [[0, 1], [1, 0], [1, 1], [1, -1]];
-            
-            for (const [dr, dc] of directions) {
-                let count = 1;
-                const winningCells = [{ row, col }];
-                
-                // Check positive direction
-                for (let i = 1; i < 5; i++) {
-                    const newRow = row + dr * i;
-                    const newCol = col + dc * i;
-                    if (newRow >= 0 && newRow < BOARD_SIZE && 
-                        newCol >= 0 && newCol < BOARD_SIZE && 
-                        board[newRow][newCol] === player) {
-                        count++;
-                        winningCells.push({ row: newRow, col: newCol });
-                    } else break;
-           
-                    }
-                
-                if (count >= 5) {
-                    highlightWinningCells(winningCells);
-                    return true;
-                }
-            }
-            return false;
+    const directions = [[0, 1], [1, 0], [1, 1], [1, -1]];
+    
+    for (const [dr, dc] of directions) {
+        let count = 1;
+        const winningCells = [{ row, col }];
+        
+        // Check positive direction
+        for (let i = 1; i < 5; i++) {
+            const newRow = row + dr * i;
+            const newCol = col + dc * i;
+            if (newRow >= 0 && newRow < BOARD_SIZE && 
+                newCol >= 0 && newCol < BOARD_SIZE && 
+                board[newRow][newCol] === player) {
+                count++;
+                winningCells.push({ row: newRow, col: newCol });
+            } else break;
         }
+        
+        // Check negative direction  
+        for (let i = 1; i < 5; i++) {
+            const newRow = row - dr * i;
+            const newCol = col - dc * i;
+            if (newRow >= 0 && newRow < BOARD_SIZE && 
+                newCol >= 0 && newCol < BOARD_SIZE && 
+                board[newRow][newCol] === player) {
+                count++;
+                winningCells.push({ row: newRow, col: newCol });
+            } else break;
+        }
+        
+        if (count >= 5) {
+            console.log(`Player ${player} wins with ${count} in a row!`);
+            highlightWinningCells(winningCells);
+            return true;
+        }
+    }
+    return false;
+}
 
         function highlightWinningCells(cells) {
             cells.forEach(({ row, col }) => {
