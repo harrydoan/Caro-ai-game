@@ -636,3 +636,181 @@
                         winningCells.push({ row: newRow, col: newCol });
                     } else break;
            
+                    }
+                
+                if (count >= 5) {
+                    highlightWinningCells(winningCells);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function highlightWinningCells(cells) {
+            cells.forEach(({ row, col }) => {
+                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                if (cell) {
+                    cell.classList.add('winning');
+                }
+            });
+        }
+
+        function isBoardFull() {
+            return board.every(row => row.every(cell => cell !== EMPTY));
+        }
+
+        function endGame(winner) {
+            gameActive = false;
+            isProcessing = false;
+            const statusElement = document.getElementById('gameStatus');
+            
+            if (winner === 'player') {
+                statusElement.textContent = '🎉 Chúc mừng! Bạn đã thắng! 🎉';
+                statusElement.className = 'winner';
+                stats.player++;
+            } else if (winner === 'ai') {
+                statusElement.textContent = '🤖 AI thắng! Thử lại nhé! 🤖';
+                statusElement.className = 'winner';
+                stats.ai++;
+            } else {
+                statusElement.textContent = '🤝 Hòa! Trận đấu cân bằng! 🤝';
+                stats.draws++;
+            }
+            
+            updateStatsDisplay();
+            saveStats();
+        }
+
+        function updateGameInfo() {
+            const playerInfo = document.getElementById('playerInfo');
+            const aiInfo = document.getElementById('aiInfo');
+            
+            if (currentPlayer === PLAYER) {
+                playerInfo.classList.add('current-turn');
+                aiInfo.classList.remove('current-turn', 'ai-thinking');
+                aiInfo.textContent = '🤖 AI (O)';
+            } else {
+                playerInfo.classList.remove('current-turn');
+                aiInfo.classList.add('current-turn', 'ai-thinking');
+                aiInfo.textContent = '🤖 AI đang suy nghĩ...';
+            }
+        }
+
+        function undoMove() {
+            if (moveHistory.length < 2 || !gameActive || isProcessing) return;
+            
+            // Remove AI move
+            const aiMove = moveHistory.pop();
+            board[aiMove.row][aiMove.col] = EMPTY;
+            const aiCell = document.querySelector(`[data-row="${aiMove.row}"][data-col="${aiMove.col}"]`);
+            if (aiCell) {
+                aiCell.textContent = '';
+                aiCell.className = 'cell';
+            }
+            
+            // Remove player move
+            const playerMove = moveHistory.pop();
+            board[playerMove.row][playerMove.col] = EMPTY;
+            const playerCell = document.querySelector(`[data-row="${playerMove.row}"][data-col="${playerMove.col}"]`);
+            if (playerCell) {
+                playerCell.textContent = '';
+                playerCell.className = 'cell';
+            }
+            
+            currentPlayer = PLAYER;
+            updateGameInfo();
+            document.getElementById('gameStatus').textContent = 'Đã hoàn tác! Đến lượt bạn.';
+        }
+
+        function resetGame() {
+            // Clear winning highlights
+            document.querySelectorAll('.cell.winning').forEach(cell => {
+                cell.classList.remove('winning');
+            });
+            
+            initGame();
+            document.getElementById('gameStatus').textContent = 'Bạn đi trước! Click để đặt X';
+        }
+
+        function resetStats() {
+            stats = { player: 0, ai: 0, draws: 0 };
+            updateStatsDisplay();
+            saveStats();
+            resetGame();
+        }
+
+        function updateStatsDisplay() {
+            document.getElementById('playerWins').textContent = stats.player;
+            document.getElementById('aiWins').textContent = stats.ai;
+            document.getElementById('draws').textContent = stats.draws;
+        }
+
+        function saveStats() {
+            try {
+                if (typeof Storage !== "undefined") {
+                    localStorage.setItem('caroStats', JSON.stringify(stats));
+                }
+            } catch (e) {
+                console.log('LocalStorage not available');
+            }
+        }
+
+        function loadStats() {
+            try {
+                if (typeof Storage !== "undefined") {
+                    const savedStats = localStorage.getItem('caroStats');
+                    if (savedStats) {
+                        stats = JSON.parse(savedStats);
+                    }
+                }
+            } catch (e) {
+                console.log('LocalStorage not available');
+            }
+            updateStatsDisplay();
+        }
+
+        // Difficulty selection
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (isProcessing) return;
+                
+                document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                aiDifficulty = this.dataset.difficulty;
+                
+                // Show difficulty change message
+                const statusElement = document.getElementById('gameStatus');
+                const oldText = statusElement.textContent;
+                statusElement.textContent = `Đã chuyển độ khó: ${this.textContent}`;
+                setTimeout(() => {
+                    if (gameActive) {
+                        statusElement.textContent = oldText;
+                    }
+                }, 2000);
+            });
+        });
+
+        // Prevent context menu and double-tap zoom
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        // Initialize game when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initGame();
+        });
+
+        // Initialize game
+        initGame();
+    </script>
+</body>
+</html>
