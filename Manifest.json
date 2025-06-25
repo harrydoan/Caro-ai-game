@@ -1,0 +1,547 @@
+// ===== manifest.json =====
+{
+  "name": "Cờ Caro AI - Thách thức AI thông minh",
+  "short_name": "Caro AI",
+  "description": "Trò chơi Cờ Caro với AI thông minh sử dụng thuật toán Minimax. Thách thức trí tuệ với 3 mức độ khó khác nhau.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#1e3c72",
+  "background_color": "#1e3c72",
+  "lang": "vi-VN",
+  "dir": "ltr",
+  "categories": [
+    "games",
+    "entertainment",
+    "education"
+  ],
+  "icons": [
+    {
+      "src": "icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Chơi ngay",
+      "short_name": "Chơi",
+      "description": "Bắt đầu game mới",
+      "url": "/?action=new-game",
+      "icons": [
+        {
+          "src": "icons/play-icon.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Thống kê",
+      "short_name": "Stats",
+      "description": "Xem thống kê trận đấu",
+      "url": "/?action=stats",
+      "icons": [
+        {
+          "src": "icons/stats-icon.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/mobile-1.png",
+      "sizes": "320x640",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "screenshots/mobile-2.png",
+      "sizes": "320x640",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "screenshots/desktop-1.png",
+      "sizes": "1024x768",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
+}
+
+// ===== sw.js (Service Worker) =====
+/*
+const CACHE_NAME = 'caro-ai-v1.0.0';
+const urlsToCache = [
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png'
+];
+
+// Install event - cache resources
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => {
+        console.log('Opened cache');
+        return cache.addAll(urlsToCache);
+      })
+  );
+  self.skipWaiting();
+});
+
+// Fetch event - serve from cache
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request)
+      .then((response) => {
+        // Return cached version or fetch from network
+        if (response) {
+          return response;
+        }
+        return fetch(event.request);
+      }
+    )
+  );
+});
+
+// Activate event - clean old caches
+self.addEventListener('activate', (event) => {
+  const cacheWhitelist = [CACHE_NAME];
+  
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+  
+  return self.clients.claim();
+});
+
+// Push notification support
+self.addEventListener('push', (event) => {
+  const options = {
+    body: event.data ? event.data.text() : 'Có trận đấu mới đang chờ bạn!',
+    icon: '/icons/icon-192x192.png',
+    badge: '/icons/badge-72x72.png',
+    vibrate: [100, 50, 100],
+    data: {
+      dateOfArrival: Date.now(),
+      primaryKey: 1
+    },
+    actions: [
+      {
+        action: 'explore',
+        title: 'Chơi ngay',
+        icon: '/icons/play-icon.png'
+      },
+      {
+        action: 'close',
+        title: 'Đóng',
+        icon: '/icons/close-icon.png'
+      }
+    ]
+  };
+  
+  event.waitUntil(
+    self.registration.showNotification('Cờ Caro AI', options)
+  );
+});
+
+// Handle notification click
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  
+  if (event.action === 'explore') {
+    event.waitUntil(
+      clients.openWindow('/')
+    );
+  }
+});
+
+// Background sync for analytics
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'background-sync') {
+    event.waitUntil(
+      // Send analytics data when back online
+      sendAnalyticsData()
+    );
+  }
+});
+
+function sendAnalyticsData() {
+  // Implementation for sending cached analytics
+  return Promise.resolve();
+}
+*/
+
+// ===== browserconfig.xml =====
+/*
+<?xml version="1.0" encoding="utf-8"?>
+<browserconfig>
+    <msapplication>
+        <tile>
+            <square70x70logo src="/icons/ms-icon-70x70.png"/>
+            <square150x150logo src="/icons/ms-icon-150x150.png"/>
+            <square310x310logo src="/icons/ms-icon-310x310.png"/>
+            <TileColor>#1e3c72</TileColor>
+        </tile>
+    </msapplication>
+</browserconfig>
+*/
+
+// ===== Digital Asset Links (for TWA) =====
+// File: /.well-known/assetlinks.json
+/*
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.carogame.smartai",
+    "sha256_cert_fingerprints": [
+      "YOUR_APP_SHA256_FINGERPRINT_HERE"
+    ]
+  }
+}]
+*/
+
+// ===== ICON GENERATION GUIDE =====
+/*
+🎨 CÁCH TẠO ICONS CHO PWA:
+
+1. TẠO ICON GỐC (512x512px):
+   - Sử dụng Canva, Figma, hoặc Adobe Illustrator
+   - Background: Gradient từ #1e3c72 đến #2a5298
+   - Foreground: Logo game (X và O stylized)
+   - Format: PNG với transparency
+   - Style: Flat, modern, clean
+
+2. GENERATE TẤT CẢ SIZES:
+   Tools khuyến nghị:
+   - PWA Asset Generator: https://www.pwabuilder.com/imageGenerator
+   - Favicon Generator: https://realfavicongenerator.net/
+   - App Icon Generator: https://appicon.co/
+
+3. SIZES CẦN THIẾT:
+   - 72x72, 96x96, 128x128, 144x144, 152x152
+   - 192x192, 384x384, 512x512 (required)
+   - 16x16, 32x32 (favicon)
+   - 180x180 (Apple touch)
+
+4. NAMING CONVENTION:
+   icons/
+   ├── icon-72x72.png
+   ├── icon-96x96.png
+   ├── icon-128x128.png
+   ├── icon-144x144.png
+   ├── icon-152x152.png
+   ├── icon-192x192.png
+   ├── icon-384x384.png
+   ├── icon-512x512.png
+   ├── favicon.ico
+   └── apple-touch-icon.png
+*/
+
+// ===== FILE STRUCTURE FOR PWA =====
+/*
+📁 PROJECT STRUCTURE:
+
+caro-ai-pwa/
+├── index.html              (Main game file)
+├── manifest.json           (PWA manifest)
+├── sw.js                   (Service worker)
+├── browserconfig.xml       (Microsoft config)
+├── icons/
+│   ├── icon-72x72.png
+│   ├── icon-96x96.png
+│   ├── icon-128x128.png
+│   ├── icon-144x144.png
+│   ├── icon-152x152.png
+│   ├── icon-192x192.png
+│   ├── icon-384x384.png
+│   ├── icon-512x512.png
+│   ├── favicon.ico
+│   ├── apple-touch-icon.png
+│   ├── play-icon.png
+│   ├── stats-icon.png
+│   └── badge-72x72.png
+├── screenshots/
+│   ├── mobile-1.png
+│   ├── mobile-2.png
+│   └── desktop-1.png
+└── .well-known/
+    └── assetlinks.json     (For TWA verification)
+*/
+
+// ===== HOSTING OPTIONS =====
+/*
+🌐 WHERE TO HOST YOUR PWA:
+
+1. GITHUB PAGES (Recommended - Free):
+   - Create GitHub repository
+   - Upload all files
+   - Enable GitHub Pages in settings
+   - Custom domain support
+   - HTTPS by default
+   - URL: https://username.github.io/repo-name
+
+2. NETLIFY (Free tier):
+   - Drag & drop deployment
+   - Automatic HTTPS
+   - Form handling
+   - Custom domain
+   - URL: https://app-name.netlify.app
+
+3. VERCEL (Free tier):
+   - Git integration
+   - Automatic deployments
+   - Serverless functions
+   - Custom domain
+   - URL: https://app-name.vercel.app
+
+4. FIREBASE HOSTING (Free tier):
+   - Google integration
+   - CDN included
+   - Custom domain
+   - Analytics
+   - URL: https://app-name.web.app
+
+5. SURGE.SH (Free):
+   - Command line deployment
+   - Custom domain
+   - Simple setup
+   - URL: https://app-name.surge.sh
+*/
+
+// ===== TESTING YOUR PWA =====
+/*
+🧪 PWA TESTING CHECKLIST:
+
+1. LIGHTHOUSE AUDIT:
+   - Open Chrome DevTools
+   - Go to Lighthouse tab
+   - Run Progressive Web App audit
+   - Target score: 90+ for all categories
+
+2. PWA FEATURES TEST:
+   ✅ Install prompt appears
+   ✅ Works offline
+   ✅ Fast loading (< 3 seconds)
+   ✅ Responsive design
+   ✅ HTTPS enabled
+   ✅ Service worker registered
+   ✅ Manifest valid
+
+3. DEVICE TESTING:
+   - Chrome (Android & Desktop)
+   - Safari (iOS)
+   - Edge (Windows)
+   - Firefox (All platforms)
+
+4. INSTALL TESTING:
+   - Install prompt works
+   - App appears on home screen
+   - Splash screen shows
+   - Runs in standalone mode
+   - Uninstall works properly
+
+5. PERFORMANCE TESTING:
+   - First Contentful Paint < 2s
+   - Largest Contentful Paint < 4s
+   - Time to Interactive < 5s
+   - Cumulative Layout Shift < 0.1
+*/
+
+// ===== SUBMISSION TO GOOGLE PLAY =====
+/*
+📱 TWA SUBMISSION PROCESS:
+
+1. PREPARE PWA:
+   - Host on HTTPS domain
+   - Ensure PWA score > 80
+   - Test on multiple devices
+   - Verify all features work offline
+
+2. CREATE TWA:
+   Option A - PWABuilder (Easiest):
+   - Go to https://www.pwabuilder.com
+   - Enter your PWA URL
+   - Click "Build My PWA"
+   - Download Android package
+   - Sign APK/AAB
+
+   Option B - Bubblewrap CLI:
+   - npm install -g @bubblewrap/cli
+   - bubblewrap init --manifest https://yoursite.com/manifest.json
+   - bubblewrap build
+   - bubblewrap sign
+
+3. DIGITAL ASSET LINKS:
+   - Add assetlinks.json to /.well-known/
+   - Include app package name and SHA fingerprint
+   - Verify with Google's validator
+
+4. GOOGLE PLAY CONSOLE:
+   - Create app listing
+   - Upload signed AAB/APK
+   - Add screenshots and descriptions
+   - Submit for review
+
+5. REVIEW PROCESS:
+   - Usually takes 1-3 days
+   - Google reviews for policy compliance
+   - May request changes or clarifications
+   - Once approved, app goes live
+*/
+
+// ===== MONETIZATION STRATEGIES =====
+/*
+💰 REVENUE OPTIONS FOR PWA:
+
+1. FREEMIUM MODEL:
+   - Basic game free
+   - Premium features ($2-5):
+     * More AI difficulties
+     * Custom themes
+     * Statistics export
+     * No limitations
+
+2. AD-SUPPORTED:
+   - Google AdSense
+   - Banner ads
+   - Interstitial ads between games
+   - Rewarded video for hints
+
+3. IN-APP PURCHASES:
+   - Hint system
+   - Undo moves pack
+   - Premium themes
+   - Remove ads
+
+4. SUBSCRIPTION:
+   - Monthly AI training updates
+   - Exclusive tournaments
+   - Advanced analytics
+   - Priority support
+
+5. DONATIONS:
+   - PayPal donate button
+   - Buy me a coffee
+   - Patreon support
+   - Ko-fi integration
+*/
+
+// ===== ANALYTICS & TRACKING =====
+/*
+📊 ANALYTICS IMPLEMENTATION:
+
+1. GOOGLE ANALYTICS 4:
+   - Track game starts
+   - AI difficulty preferences
+   - Win/loss rates
+   - Session duration
+
+2. CUSTOM EVENTS:
+   - Game completed
+   - Difficulty changed
+   - App installed
+   - Offline usage
+
+3. PERFORMANCE MONITORING:
+   - Page load times
+   - Error tracking
+   - User flow analysis
+   - Conversion rates
+
+4. A/B TESTING:
+   - UI variations
+   - Difficulty balancing
+   - Feature adoption
+   - User retention
+*/
+
+// ===== SUCCESS METRICS =====
+/*
+🎯 KPIs TO TRACK:
+
+Week 1:
+- 100+ PWA installs
+- 70+ Lighthouse score
+- < 3s load time
+- 50+ daily active users
+
+Month 1:
+- 500+ installs
+- 4.0+ rating (if on app stores)
+- 60%+ retention rate
+- 80+ Lighthouse score
+
+Month 3:
+- 2,000+ installs
+- Featured on PWA showcases
+- 1,000+ daily games played
+- Positive user reviews
+
+Month 6:
+- 5,000+ installs
+- Monetization established
+- Community features
+- Platform expansion ready
+*/
