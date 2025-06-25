@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1e3c72">
+    <meta name="description" content="Cờ Caro AI - Trò chơi Cờ Caro với AI thông minh sử dụng thuật toán Minimax">
+    <meta name="keywords" content="cờ caro, tic tac toe, AI, minimax, gomoku, trò chơi">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0iIzFlM2M3MiIvPgo8Y2lyY2xlIGN4PSIxMCIgY3k9IjEwIiByPSIzIiBmaWxsPSIjZmY2YjZiIi8+CjxjaXJjbGUgY3g9IjIyIiBjeT0iMjIiIHI9IjMiIGZpbGw9IiM0ZWNkYzQiLz4KPGxpbmUgeDE9IjciIHkxPSI3IiB4Mj0iMjUiIHkyPSIyNSIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjIiLz4KPC9zdmc+">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iNDAiIGZpbGw9IiMxZTNjNzIiLz4KPHN2ZyB4PSI0MCIgeT0iNDAiIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj4KPGNpcmNsZSBjeD0iMjUiIGN5PSIyNSIgcj0iMTAiIGZpbGw9IiNmZjZiNmIiLz4KPHN2ZyB4PSI1MCIgeT0iNTAiPgo8Y2lyY2xlIGN4PSIyNSIgY3k9IjI1IiByPSIxMCIgZmlsbD0iIzRlY2RjNCIvPgo8L3N2Zz4KPGxpbmUgeDE9IjEwIiB5MT0iMTAiIHgyPSI5MCIgeTI9IjkwIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iNSIvPgo8L3N2Zz4KPC9zdmc+">
+    
+    <!-- iOS specific -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Cờ Caro AI">
+    
+    <!-- Microsoft specific -->
+    <meta name="msapplication-TileColor" content="#1e3c72">
+    <meta name="msapplication-config" content="browserconfig.xml">
+    
+    <title>Cờ Caro AI - Thách thức AI thông minh</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            max-width: 95vw;
+            max-height: 95vh;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .install-prompt {
+            background: linear-gradient(45deg, #4ecdc4, #ff6b6b);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            border: none;
+            font-weight: bold;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .install-prompt:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .install-prompt.show {
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-5px); }
+            60% { transform: translateY(-2px); }
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+
+        .player-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 8px;
+            min-width: 100px;
+            font-size: 0.85em;
+        }
+
+        .current-turn {
+            background: rgba(76, 205, 196, 0.3);
+            border: 2px solid #4ecdc4;
+        }
+
+        .ai-thinking {
+            color: #ffa726;
+            font-style: italic;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(15, 1fr);
+            grid-template-rows: repeat(15, 1fr);
+            gap: 1px;
+            margin: 10px auto;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 8px;
+            border-radius: 8px;
+            max-width: 90vmin;
+            max-height: 50vh;
+            aspect-ratio: 1;
+        }
+
+        .cell {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 2px;
+            font-size: 0.7em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1;
+            min-height: 18px;
+            touch-action: manipulation;
+        }
+
+        .cell:active {
+            background: rgba(255, 255, 255, 1);
+            transform: scale(0.95);
+        }
+
+        .cell.player {
+            background: #ff6b6b;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .cell.ai {
+            background: #4ecdc4;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .cell.winning {
+            background: #ffa726 !important;
+            animation: pulse 0.5s infinite;
+            transform: scale(1.1);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .game-status {
+            margin: 10px 0;
+            font-size: 1em;
+            font-weight: bold;
+            min-height: 25px;
+        }
+
+        .winner {
+            color: #4ecdc4;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            animation: celebrate 1s infinite;
+        }
+
+        @keyframes celebrate {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-5px); }
+            60% { transform: translateY(-2px); }
+        }
+
+        .controls {
+            margin-top: 10px;
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            font-size: 0.9em;
+            font-weight: bold;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            touch-action: manipulation;
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .difficulty-selector {
+            margin-bottom: 10px;
+        }
+
+        .difficulty-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid transparent;
+            color: white;
+            padding: 6px 12px;
+            margin: 0 3px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8em;
+            touch-action: manipulation;
+        }
+
+        .difficulty-btn.active {
+            background: rgba(76, 205, 196, 0.3);
+            border-color: #4ecdc4;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 8px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+
+        .stat-label {
+            font-size: 0.8em;
+            opacity: 0.9;
+        }
+
+        .offline-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #ff6b6b;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            display: none;
+        }
+
+        .offline-indicator.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            .game-board {
+                max-height: 40vh;
+                padding: 6px;
+            }
+            
+            .cell {
+                font-size: 0.6em;
+                min-height: 16px;
+            }
+            
+            .controls {
+                gap: 5px;
+            }
+            
+            .btn {
+                padding: 6px 12px;
+                font-size: 0.8em;
+            }
+        }
+
+        @media (orientation: landscape) and (max-height: 600px) {
+            .game-container {
+                padding: 8px;
+                max-height: 90vh;
+            }
+            
+            h1 {
+                font-size: 1.3em;
+                margin-bottom: 5px;
+            }
+            
+            .game-board {
+                max-height: 35vh;
+            }
+            
+            .stats, .game-info {
+                margin: 5px 0;
+            }
+        }
+
+        /* Prevent scrolling */
+        html, body {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* PWA loading indicator */
+        .loading {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #4ecdc4;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-indicator" id="offlineIndicator">
+        📡 Chế độ Offline
+    </div>
+    
+    <div class="loading" id="loading">
+        <div>🎮 Đang tải Cờ Caro AI...</div>
+    </div>
+    
+    <div class="game-container">
+        <button class="install-prompt" id="installPrompt">
+            📱 Cài đặt App
+        </button>
+        
+        <h1>🎯 CỜ CARO AI 🤖</h1>
+        
+        <div class="difficulty-selector">
+            <span style="font-size: 0.9em;">Độ khó: </span>
+            <button class="difficulty-btn" data-difficulty="medium">Dễ</button>
+            <button class="difficulty-btn active" data-difficulty="hard">Vừa</button>
+            <button class="difficulty-btn" data-difficulty="expert">Khó</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="playerWins">0</div>
+                <div class="stat-label">Bạn</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="aiWins">0</div>
+                <div class="stat-label">AI</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="draws">0</div>
+                <div class="stat-label">Hòa</div>
+            </div>
+        </div>
+
+        <div class="game-info">
+            <div class="player-info current-turn" id="playerInfo">
+                👤 Bạn (X)
+            </div>
+            <div class="player-info" id="aiInfo">
+                🤖 AI (O)
+            </div>
+        </div>
+
+        <div class="game-board" id="gameBoard"></div>
+
+        <div class="game-status" id="gameStatus">Bạn đi trước!</div>
+
+        <div class="controls">
+            <button class="btn" onclick="resetGame()">🔄 Chơi lại</button>
+            <button class="btn" onclick="resetStats()">📊 Reset</button>
+            <button class="btn" onclick="undoMove()" id="undoBtn">↶ Hoàn tác</button>
+        </div>
+    </div>
+
+    <script>
+        // PWA Installation
+        let deferredPrompt;
+        const installPrompt = document.getElementById('installPrompt');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installPrompt.classList.add('show');
+        });
+
+        installPrompt.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                console.log('PWA installed');
+                installPrompt.classList.remove('show');
+            }
+            
+            deferredPrompt = null;
+        });
+
+        // Check if already installed
+        window.addEventListener('appinstalled', () => {
+            installPrompt.classList.remove('show');
+            console.log('PWA was installed');
+        });
+
+        // Online/Offline detection
+        const offlineIndicator = document.getElementById('offlineIndicator');
+
+        function updateOnlineStatus() {
+            if (navigator.onLine) {
+                offlineIndicator.classList.remove('show');
+            } else {
+                offlineIndicator.classList.add('show');
+            }
+        }
+
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        updateOnlineStatus();
+
+        // Game Logic (Same as before but optimized for PWA)
+        const BOARD_SIZE = 15;
+        const EMPTY = 0;
+        const PLAYER = 1;
+        const AI = 2;
+        
+        let board = [];
+        let gameActive = true;
+        let currentPlayer = PLAYER;
+        let aiDifficulty = 'hard';
+        let moveHistory = [];
+        let stats = { player: 0, ai: 0, draws: 0 };
+        let isProcessing = false;
+        
+        // Performance optimization for mobile
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        // Prevent zoom on iOS
+        document.addEventListener('gesturestart', function (e) {
+            e.preventDefault();
+        });
+
+        function initGame() {
+            board = Array(BOARD_SIZE).fill().map(() => Array(BOARD_SIZE).fill(EMPTY));
+            gameActive = true;
+            currentPlayer = PLAYER;
+            moveHistory = [];
+            isProcessing = false;
+            createBoard();
+            updateGameInfo();
+            loadStats();
+        }
+
+        function createBoard() {
+            const gameBoard = document.getElementById('gameBoard');
+            gameBoard.innerHTML = '';
+            
+            for (let i = 0; i < BOARD_SIZE; i++) {
+                for (let j = 0; j < BOARD_SIZE; j++) {
+                    const cell = document.createElement('button');
+                    cell.className = 'cell';
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    cell.addEventListener('touchstart', handleCellTouch, { passive: false });
+                    cell.addEventListener('click', handleCellClick);
+                    gameBoard.appendChild(cell);
+                }
+            }
+        }
+
+        function handleCellTouch(e) {
+            e.preventDefault();
+            handleCellClick(e);
+        }
+
+        function handleCellClick(e) {
+            if (!gameActive || currentPlayer !== PLAYER || isProcessing) return;
+            
+            const row = parseInt(e.target.dataset.row);
+            const col = parseInt(e.target.dataset.col);
+            
+            if (board[row][col] !== EMPTY) return;
+            
+            isProcessing = true;
+            makeMove(row, col, PLAYER);
+            
+            if (checkWin(row, col, PLAYER)) {
+                endGame('player');
+                return;
+            }
+            
+            if (isBoardFull()) {
+                endGame('draw');
+                return;
+            }
+            
+            currentPlayer = AI;
+            updateGameInfo();
+            
+            setTimeout(() => {
+                if (gameActive && !isProcessing) {
+                    makeAIMove();
+                }
+            }, 300);
+        }
+
+        function makeMove(row, col, player) {
+            board[row][col] = player;
+            moveHistory.push({ row, col, player });
+            
+            const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+            cell.textContent = player === PLAYER ? 'X' : 'O';
+            cell.className = `cell ${player === PLAYER ? 'player' : 'ai'}`;
+            
+            // Haptic feedback
+            if (navigator.vibrate && player === PLAYER) {
+                navigator.vibrate(30);
+            }
+        }
+
+        function makeAIMove() {
+            const move = getBestMove();
+            if (move) {
+                makeMove(move.row, move.col, AI);
+                
+                if (checkWin(move.row, move.col, AI)) {
+                    endGame('ai');
+                    return;
+                }
+                
+                if (isBoardFull()) {
+                    endGame('draw');
+                    return;
+                }
+                
+                currentPlayer = PLAYER;
+                updateGameInfo();
+                isProcessing = false;
+            }
+        }
+
+        function getBestMove() {
+            if (aiDifficulty === 'medium') {
+                return Math.random() < 0.4 ? getSmartMove() : getRandomMove();
+            } else if (aiDifficulty === 'hard') {
+                return Math.random() < 0.85 ? getSmartMove() : getRandomMove();
+            } else {
+                return getSmartMove();
+            }
+        }
+
+        function getRandomMove() {
+            const availableMoves = [];
+            for (let i = 0; i < BOARD_SIZE; i++) {
+                for (let j = 0; j < BOARD_SIZE; j++) {
+                    if (board[i][j] === EMPTY) {
+                        availableMoves.push({ row: i, col: j });
+                    }
+                }
+            }
+            return availableMoves[Math.floor(Math.random() * availableMoves.length)];
+        }
+
+        function getSmartMove() {
+            const depth = aiDifficulty === 'expert' ? 3 : aiDifficulty === 'hard' ? 2 : 1;
+            const result = minimax(board, depth, -Infinity, Infinity, true);
+            return result.move || getStrategicMove();
+        }
+
+        function minimax(board, depth, alpha, beta, isMaximizing) {
+            const gameState = evaluateGameState();
+            if (gameState !== null || depth === 0) {
+                return { score: gameState || evaluateBoardState(), move: null };
+            }
+
+            let bestMove = null;
+            
+            if (isMaximizing) {
+                let maxScore = -Infinity;
+                const moves = getOrderedMoves();
+                
+                for (const move of moves) {
+                    board[move.row][move.col] = AI;
+                    const result = minimax(board, depth - 1, alpha, beta, false);
+                    board[move.row][move.col] = EMPTY;
+                    
+                    if (result.score > maxScore) {
+                        maxScore = result.score;
+                        bestMove = move;
+                    }
+                    
+                    alpha = Math.max(alpha, result.score);
+                    if (beta <= alpha) break;
+                }
+                
+                return { score: maxScore, move: bestMove };
+            } else {
+                let minScore = Infinity;
+                const moves = getOrderedMoves();
+                
+                for (const move of moves) {
+                    board[move.row][move.col] = PLAYER;
+                    const result = minimax(board, depth - 1, alpha, beta, true);
+                    board[move.row][move.col] = EMPTY;
+                    
+                    if (result.score < minScore) {
+                        minScore = result.score;
+                        bestMove = move;
+                    }
+                    
+                    beta = Math.min(beta, result.score);
+                    if (beta <= alpha) break;
+                }
+                
+                return { score: minScore, move: bestMove };
+            }
+        }
+
+        function evaluateGameState() {
+            for (let i = 0; i < BOARD_SIZE; i++) {
+                for (let j = 0; j < BOARD_SIZE; j++) {
+                    if (board[i][j] === AI && checkWinState(i, j, AI)) {
+                        return 10000;
+                    }
+                    if (board[i][j] === PLAYER && checkWinState(i, j, PLAYER)) {
+                        return -10000;
+                    }
+                }
+            }
+            return null;
+        }
+
+        function checkWinState(row, col, player) {
+            const directions = [[0,1], [1,0], [1,1], [1,-1]];
+            
+            for (const [dr, dc] of directions) {
+                let count = 1;
+                
+                for (let i = 1; i < 5; i++) {
+                    const nr = row + dr * i;
+                    const nc = col + dc * i;
+                    if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && 
+                        board[nr][nc] === player) {
+                        count++;
+                    } else break;
+                }
+                
+                for (let i = 1; i < 5; i++) {
+                    const nr = row - dr * i;
+                    const nc = col - dc * i;
+                    if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && 
+                        board[nr][nc] === player) {
+                        count++;
+                    } else break;
+                }
+                
+                if (count >= 5) return true;
+            }
+            return false;
+        }
+
+        function evaluateBoardState() {
+            let score = 0;
+            
+            const directions = [[0,1], [1,0], [1,1], [1,-1]];
+            
+            for (let i = 0; i < BOARD_SIZE; i++) {
+                for (let j = 0; j < BOARD_SIZE; j++) {
+                    for (const [dr, dc] of directions) {
+                        if (i + 4 * dr >= 0 && i + 4 * dr < BOARD_SIZE && 
+                            j + 4 * dc >= 0 && j + 4 * dc < BOARD_SIZE) {
+                            score += evaluateLine(i, j, dr, dc);
+                        }
+                    }
+                }
+            }
+            
+            return score;
+        }
+
+        function evaluateLine(row, col, dr, dc) {
+            let aiCount = 0;
+            let playerCount = 0;
+            
+            for (let i = 0; i < 5; i++) {
+                const nr = row + i * dr;
+                const nc = col + i * dc;
+                const cell = board[nr][nc];
+                
+                if (cell === AI) aiCount++;
+                else if (cell === PLAYER) playerCount++;
+            }
+            
+            if (aiCount > 0 && playerCount > 0) return 0;
+            
+            if (aiCount === 4) return 1000;
+            if (aiCount === 3) return 100;
+            if (aiCount === 2) return 10;
+            if (aiCount === 1) return 1;
+            
+            if (playerCount === 4) return -1000;
+            if (playerCount === 3) return -100;
+            if (playerCount === 2) return -10;
+            if (playerCount === 1) return -1;
+            
+            return 0;
+        }
+
+        function getOrderedMoves() {
+            const moves = [];
+            const moveScores = [];
+            
+            for (let i = 0; i < BOARD_SIZE; i++) {
+                for (let j = 0; j < BOARD_SIZE; j++) {
+                    if (board[i][j] === EMPTY) {
+                        if (hasNearbyPiece(i, j) || moveHistory.length < 2) {
+                            const move = { row: i, col: j };
+                            const score = quickEvaluateMove(i, j);
+                            moveScores.push({ move, score });
+                        }
+                    }
+                }
+            }
+            
+            moveScores.sort((a, b) => b.score - a.score);
+            return moveScores.slice(0, 12).map(item => item.move);
+        }
+
+        function hasNearbyPiece(row, col) {
+            for (let dr = -2; dr <= 2; dr++) {
+                for (let dc = -2; dc <= 2; dc++) {
+                    if (dr === 0 && dc === 0) continue;
+                    const nr = row + dr;
+                    const nc = col + dc;
+                    if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
+                        if (board[nr][nc] !== EMPTY) return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function quickEvaluateMove(row, col) {
+            let score = 0;
+            
+            const centerDistance = Math.abs(row - 7) + Math.abs(col - 7);
+            score += (14 - centerDistance) * 2;
+            
+            const directions = [[0,1], [1,0], [1,1], [1,-1]];
+            
+            for (const [dr, dc] of directions) {
+                let aiConsecutive = countConsecutiveInDirection(row, col, dr, dc, AI);
+                let playerConsecutive = countConsecutiveInDirection(row, col, dr, dc, PLAYER);
+                
+                if (aiConsecutive >= 4) score += 5000;
+                else if (aiConsecutive >= 3) score += 500;
+                else if (aiConsecutive >= 2) score += 50;
+                
+                if (playerConsecutive >= 4) score += 4000;
+                else if (playerConsecutive >= 3) score += 400;
+                else if (playerConsecutive >= 2) score += 40;
+            }
+            
+            return score;
+        }
+
+        function countConsecutiveInDirection(row, col, dr, dc, player) {
+            let count = 0;
+            
+            for (let i = 1; i <= 4; i++) {
+                const nr = row + dr * i;
+                const nc = col + dc * i;
+                if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && 
+                    board[nr][nc] === player) {
+                    count++;
+                } else break;
+            }
+            
+            for (let i = 1; i <= 4; i++) {
+                const nr = row - dr * i;
+                const nc = col - dc * i;
+                if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && 
+                    board[nr][nc] === player) {
+                    count++;
+                } else break;
+            }
+            
+            return count;
+        }
+
+        function getStrategicMove() {
+            let bestMove = null;
+            let bestScore = -Infinity;
+            
+            for (let i = 0; i < BOARD_SIZE; i++) {
+                for (let j = 0; j < BOARD_SIZE; j++) {
+                    if (board[i][j] === EMPTY && (hasNearbyPiece(i, j) || moveHistory.length < 2)) {
+                        const score = quickEvaluateMove(i, j);
+                        if (score > bestScore) {
+                            bestScore = score;
+                            bestMove = { row: i, col: j };
+                        }
+                    }
+                }
+            }
+            
+            return bestMove || { row: 7, col: 7 };
+        }
+
+        function checkWin(row, col, player) {
+            const directions = [[0, 1], [1, 0], [1, 1], [1, -1]];
+            
+            for (const [dr, dc] of directions) {
+                let count = 1;
+                const winningCells = [{ row, col }];
+                
+                for (let i = 1; i < 5; i++) {
+                    const newRow = row + dr * i;
+                    const newCol = col + dc * i;
+                    if (newRow >= 0 && newRow < BOARD_SIZE && 
+                        newCol >= 0 && newCol < BOARD_SIZE && 
+                        board[newRow][newCol] === player) {
+                        count++;
+                        winningCells.push({ row: newRow, col: newCol });
+                    } else break;
+                }
+                
+                for (let i = 1; i < 5; i++) {
+                    const newRow = row - dr * i;
+                    const newCol = col - dc * i;
+                    if (newRow >= 0 && newRow < BOARD_SIZE && 
+                        newCol >= 0 && newCol < BOARD_SIZE && 
+                        board[newRow][newCol] === player) {
+                        count++;
+                        winningCells.push({ row: newRow, col: newCol });
+                    } else break;
+                }
+                
+                if (count >= 5) {
+                    highlightWinningCells(winningCells);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function highlightWinningCells(cells) {
+            cells.forEach(({ row, col }) => {
+                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                cell.classList.add('winning');
+            });
+        }
+
+        function isBoardFull() {
+            return board.every(row => row.every(cell => cell !== EMPTY));
+        }
+
+        function endGame(winner) {
+            gameActive = false;
+            isProcessing = false;
+            const statusElement = document.getElementById('gameStatus');
+            
+            if (winner === 'player') {
+                statusElement.textContent = '🎉 Bạn thắng! 🎉';
+                statusElement.className = 'winner';
+                stats.player++;
+            } else if (winner === 'ai') {
+                statusElement.textContent = '🤖 AI thắng! 🤖';
+                statusElement.className = 'winner';
+                stats.ai++;
+            } else {
+                statusElement.textContent = '🤝 Hòa! 🤝';
+                stats.draws++;
+            }
+            
+            saveStats();
+            updateStatsDisplay();
+        }
+
+        function updateGameInfo() {
+            const playerInfo = document.getElementById('playerInfo');
+            const aiInfo = document.getElementById('aiInfo');
+            
+            if (currentPlayer === PLAYER) {
+                playerInfo.classList.add('current-turn');
+                aiInfo.classList.remove('current-turn', 'ai-thinking');
+            } else {
+                playerInfo.classList.remove('current-turn');
+                aiInfo.classList.add('current-turn', 'ai-thinking');
+                aiInfo.innerHTML = '🤖 AI đang suy nghĩ...';
+                setTimeout(() => {
+                    if (gameActive) {
+                        aiInfo.innerHTML = '🤖 AI (O)';
+                        aiInfo.classList.remove('ai-thinking');
+                    }
+                }, 800);
+            }
+        }
+
+        function undoMove() {
+            if (moveHistory.length < 2 || !gameActive || isProcessing) return;
+            
+            const aiMove = moveHistory.pop();
+            board[aiMove.row][aiMove.col] = EMPTY;
+            const aiCell = document.querySelector(`[data-row="${aiMove.row}"][data-col="${aiMove.col}"]`);
+            aiCell.textContent = '';
+            aiCell.className = 'cell';
+            
+            const playerMove = moveHistory.pop();
+            board[playerMove.row][playerMove.col] = EMPTY;
+            const playerCell = document.querySelector(`[data-row="${playerMove.row}"][data-col="${playerMove.col}"]`);
+            playerCell.textContent = '';
+            playerCell.className = 'cell';
+            
+            currentPlayer = PLAYER;
+            isProcessing = false;
+            updateGameInfo();
+            document.getElementById('gameStatus').textContent = 'Đã hoàn tác!';
+        }
+
+        function resetGame() {
+            initGame();
+            document.getElementById('gameStatus').textContent = 'Bạn đi trước!';
+        }
+
+        function resetStats() {
+            stats = { player: 0, ai: 0, draws: 0 };
+            saveStats();
+            updateStatsDisplay();
+        }
+
+        function updateStatsDisplay() {
+            document.getElementById('playerWins').textContent = stats.player;
+            document.getElementById('aiWins').textContent = stats.ai;
+            document.getElementById('draws').textContent = stats.draws;
+        }
+
+        function saveStats() {
+            try {
+                if (typeof Storage !== "undefined") {
+                    localStorage.setItem('caroStats', JSON.stringify(stats));
+                }
+            } catch (e) {
+                console.log('LocalStorage not available');
+            }
+        }
+
+        function loadStats() {
+            try {
+                if (typeof Storage !== "undefined") {
+                    const savedStats = localStorage.getItem('caroStats');
+                    if (savedStats) {
+                        stats = JSON.parse(savedStats);
+                    }
+                }
+            } catch (e) {
+                console.log('LocalStorage not available');
+            }
+            updateStatsDisplay();
+        }
+
+        // Difficulty selection
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (isProcessing) return;
+                
+                document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                aiDifficulty = this.dataset.difficulty;
+            });
+        });
+
+        // Initialize game when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hide loading indicator
+            document.getElementById('loading').style.display = 'none';
+            
+            // Initialize game
+            initGame();
+            
+            // Register service worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js')
+                    .then((registration) => {
+                        console.log('Service Worker registered successfully:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            }
+        });
+
+        // Prevent context menu on long press
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // Handle orientation change
+        window.addEventListener('orientationchange', function() {
+            setTimeout(function() {
+                document.body.style.height = window.innerHeight + 'px';
+            }, 500);
+        });
+
+        // Initialize game
+        initGame();
+    </script>
+</body>
+</html>
